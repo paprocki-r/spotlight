@@ -10,7 +10,7 @@ For dev:
 ====================
 .. code-block:: bash
 
-   $ git clone git@github.com/myuser/foo.git@my_version
+   $ git clone git@github.com:paprocki-r/spotlight.git
    $ pip install --editable ./
 
 
