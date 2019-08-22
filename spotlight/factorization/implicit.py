@@ -13,7 +13,8 @@ from spotlight.factorization._components import _predict_process_ids
 from spotlight.losses import (adaptive_hinge_loss,
                               bpr_loss,
                               hinge_loss,
-                              pointwise_loss)
+                              pointwise_loss,
+                              my_own_loss)
 from spotlight.factorization.representations import BilinearNet
 from spotlight.sampling import sample_items
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
@@ -90,7 +91,8 @@ class ImplicitFactorizationModel(object):
         assert loss in ('pointwise',
                         'bpr',
                         'hinge',
-                        'adaptive_hinge')
+                        'adaptive_hinge',
+                        'my_own')
 
         self._loss = loss
         self._embedding_dim = embedding_dim
@@ -155,6 +157,8 @@ class ImplicitFactorizationModel(object):
             self._loss_func = bpr_loss
         elif self._loss == 'hinge':
             self._loss_func = hinge_loss
+        elif self._loss == 'my_own':
+            self._loss_func = my_own_loss
         else:
             self._loss_func = adaptive_hinge_loss
 
@@ -181,7 +185,19 @@ class ImplicitFactorizationModel(object):
             raise ValueError('Maximum item id greater '
                              'than number of items in model.')
 
-    def fit(self, interactions, verbose=False):
+    def generateMask(self, tfilter:np.ndarray, user_ids: torch.Tensor, item_ids: torch.Tensor) -> torch.Tensor:
+
+        tfilter = np.nan_to_num(tfilter)
+        if(sum(sum(tfilter))==0):
+            return None
+
+        mask = tfilter[user_ids, item_ids]
+        mask_tensor = gpu(torch.from_numpy(mask),
+                          self._use_cuda)
+
+        return mask_tensor
+
+    def fit(self, interactions, filter = None, verbose=False):
         """
         Fit the model.
 
@@ -236,7 +252,11 @@ class ImplicitFactorizationModel(object):
 
                 self._optimizer.zero_grad()
 
-                loss = self._loss_func(positive_prediction, negative_prediction)
+                mask = None
+                if (filter is not None):
+                    mask = self.generateMask(filter, batch_user, batch_item)
+
+                loss = self._loss_func(positive_prediction, negative_prediction, mask)
                 epoch_loss += loss.item()
 
                 loss.backward()

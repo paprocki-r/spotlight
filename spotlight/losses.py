@@ -14,6 +14,43 @@ import torch.nn.functional as F
 
 from spotlight.torch_utils import assert_no_grad
 
+def my_own_loss(positive_predictions, negative_predictions, mask=None):
+    """
+    modified copy of Hinge pairwise loss function.
+
+    Parameters
+    ----------
+
+    positive_predictions: tensor
+        Tensor containing predictions for known positive items.
+    negative_predictions: tensor
+        Tensor containing predictions for sampled negative items.
+    mask: tensor, optional
+        A binary tensor used to zero the loss from some entries
+        of the loss tensor.
+
+    Returns
+    -------
+
+    loss, float
+        The mean value of the loss function.
+    """
+
+    loss = torch.clamp(negative_predictions -
+                       positive_predictions +
+                       1.0, 0.0)
+
+    if (mask is not None and mask.sum()>0):
+        print("masking")
+        mask = mask.float()
+        loss = loss * mask
+        ret_loss = loss.sum() / mask.sum()
+    else:
+        ret_loss = loss.mean()
+
+
+    return ret_loss
+
 
 def pointwise_loss(positive_predictions, negative_predictions, mask=None):
     """
