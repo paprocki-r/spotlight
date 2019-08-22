@@ -1,3 +1,12 @@
+HOW TO INSTALL:
+~~~~~~~~~~~~
+.. code-block:: python
+
+   pip install git+https://github.com/paprocki-r/spotlight.git
+
+
+
+
 .. image:: docs/_static/img/spotlight.png
 
 ---------------------------------------------------------------------
