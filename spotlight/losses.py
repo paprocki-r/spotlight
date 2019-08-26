@@ -41,7 +41,6 @@ def my_own_loss(positive_predictions, negative_predictions, mask=None):
                        1.0, 0.0)
 
     if (mask is not None and mask.sum()>0):
-        print("masking")
         mask = mask.float()
         loss = loss * mask
         ret_loss = loss.sum() / mask.sum()
