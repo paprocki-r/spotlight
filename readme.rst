@@ -1,3 +1,19 @@
+HOW TO INSTALL:
+~~~~~~~~~~~~
+For usage:
+====================
+.. code-block:: bash
+
+   $ pip install git+https://github.com/paprocki-r/spotlight.git
+
+For dev:
+====================
+.. code-block:: bash
+
+   $ git clone git@github.com:paprocki-r/spotlight.git
+   $ pip install --editable ./
+
+
 .. image:: docs/_static/img/spotlight.png
 
 ---------------------------------------------------------------------
